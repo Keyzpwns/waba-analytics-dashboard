@@ -13,6 +13,14 @@ const COLUMNS = [
   { key: 'engagement_rate', label: 'Eng. %', type: 'number', width: 'w-20 text-right' },
 ]
 
+// Sort options offered on mobile (where column headers aren't tappable)
+const MOBILE_SORTS = [
+  { key: 'views', label: 'Views' },
+  { key: 'reach', label: 'Reach' },
+  { key: 'reactions', label: 'React.' },
+  { key: 'sent_at', label: 'Date' },
+]
+
 const PLATFORM_DOT = {
   Instagram: 'bg-ember',
   TikTok: 'bg-gold',
@@ -21,14 +29,14 @@ const PLATFORM_DOT = {
 }
 
 function formatDate(iso) {
-  if (!iso) return '—'
+  if (!iso) return '\u2014'
   const d = new Date(iso)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 function formatNumber(n, key) {
-  if (n == null) return '—'
-  if (key === 'engagement_rate') return n === 0 ? '—' : `${Number(n).toFixed(1)}`
+  if (n == null) return '\u2014'
+  if (key === 'engagement_rate') return n === 0 ? '\u2014' : `${Number(n).toFixed(1)}`
   return Number(n).toLocaleString()
 }
 
@@ -73,12 +81,13 @@ export default function PostTable({ posts }) {
 
   return (
     <div>
-      <div className="flex gap-1 mb-4 text-xs font-mono">
+      {/* Platform filter -- scrolls horizontally if it overflows on narrow screens */}
+      <div className="flex gap-1 mb-4 text-xs font-mono overflow-x-auto -mx-1 px-1 pb-1">
         {platforms.map(p => (
           <button
             key={p}
             onClick={() => setPlatformFilter(p)}
-            className={`px-3 py-1.5 uppercase tracking-widest transition-colors ${
+            className={`px-3 py-1.5 uppercase tracking-widest transition-colors whitespace-nowrap shrink-0 ${
               platformFilter === p
                 ? 'bg-paper text-ink'
                 : 'bg-stone text-ash hover:text-paper'
@@ -89,7 +98,60 @@ export default function PostTable({ posts }) {
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile sort control -- only visible below md */}
+      <div className="md:hidden mb-4">
+        <p className="eyebrow mb-2">Sort by</p>
+        <div className="flex gap-1 text-xs font-mono overflow-x-auto -mx-1 px-1 pb-1">
+          {MOBILE_SORTS.map(s => {
+            const active = sortKey === s.key
+            return (
+              <button
+                key={s.key}
+                onClick={() => toggleSort(s.key)}
+                className={`px-3 py-1.5 uppercase tracking-widest transition-colors whitespace-nowrap shrink-0 ${
+                  active ? 'bg-paper text-ink' : 'bg-stone text-ash hover:text-paper'
+                }`}
+              >
+                {s.label}{active && <span className="ml-1">{sortDir === 'asc' ? '\u2191' : '\u2193'}</span>}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {sorted.length === 0 && (
+        <div className="px-3 py-12 text-center eyebrow">No posts in view</div>
+      )}
+
+      {/* MOBILE: stacked cards (hidden on md+) */}
+      <div className="md:hidden space-y-px bg-paper/5">
+        {sorted.map(post => (
+          <div key={post.id} className="bg-ink p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="flex items-center gap-2 font-mono text-xs text-paper">
+                <span className={`inline-block w-1.5 h-1.5 rounded-full ${PLATFORM_DOT[post.platform] || 'bg-ash'}`} />
+                {post.platform}
+              </span>
+              <span className="font-mono text-xs text-ash">{formatDate(post.sent_at)}</span>
+            </div>
+            <p className="font-display text-bone/80 text-sm leading-snug mb-3 line-clamp-2">
+              {post.text_preview || <span className="text-ash italic">(no caption)</span>}
+            </p>
+            <div className="grid grid-cols-3 gap-y-2 gap-x-3 font-mono text-[0.7rem]">
+              <Metric label="Views" value={formatNumber(post.views, 'views')} />
+              <Metric label="Reach" value={formatNumber(post.reach, 'reach')} />
+              <Metric label="Imp." value={formatNumber(post.impressions, 'impressions')} />
+              <Metric label="React." value={formatNumber(post.reactions, 'reactions')} />
+              <Metric label="Comm." value={formatNumber(post.comments, 'comments')} />
+              <Metric label="Shares" value={formatNumber(post.shares, 'shares')} />
+              <Metric label="Eng. %" value={formatNumber(post.engagement_rate, 'engagement_rate')} accent />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* DESKTOP: table (hidden below md) */}
+      <div className="hidden md:block overflow-x-auto">
         <div className="min-w-[1080px]">
           <div className="flex gap-3 px-3 py-2 border-b border-paper/10">
             {COLUMNS.map(col => {
@@ -101,15 +163,11 @@ export default function PostTable({ posts }) {
                   className={`eyebrow ${col.width} ${active ? 'text-ember' : 'hover:text-paper'}`}
                 >
                   {col.label}
-                  {active && <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                  {active && <span className="ml-1">{sortDir === 'asc' ? '\u2191' : '\u2193'}</span>}
                 </button>
               )
             })}
           </div>
-
-          {sorted.length === 0 && (
-            <div className="px-3 py-12 text-center eyebrow">No posts in view</div>
-          )}
 
           {sorted.map(post => (
             <div
@@ -135,6 +193,15 @@ export default function PostTable({ posts }) {
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function Metric({ label, value, accent }) {
+  return (
+    <div>
+      <p className="text-ash uppercase tracking-wider mb-0.5">{label}</p>
+      <p className={accent ? 'text-gold' : 'text-paper'}>{value}</p>
     </div>
   )
 }
