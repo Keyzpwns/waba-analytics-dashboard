@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: #0A0A0B;
+  color: #F5F2EC;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Editorial text selection */
+::selection {
+  background: #C73E1D;
+  color: #F5F2EC;
+}
+
+/* Subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0B;
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2A2D;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3D;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8A8680;
+}
+
+.hairline {
+  border-top: 1px solid rgba(245, 242, 236, 0.08);
+}
+
+.report-prose {
+  font-family: 'Fraunces', serif;
+  font-weight: 350;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: #E8E4DA;
+}
+.report-prose p { margin-bottom: 1.1em; }
+.report-prose strong, .report-prose b {
+  font-weight: 600;
+  color: #F5F2EC;
+}
+.report-prose em, .report-prose i { font-style: italic; color: #D4A24C; }
+.report-prose ul { margin: 0.75em 0 1.25em 0; padding: 0; list-style: none; }
+.report-prose li {
+  padding-left: 1.25em;
+  position: relative;
+  margin-bottom: 0.5em;
+}
+.report-prose li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: #C73E1D;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
