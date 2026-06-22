@@ -49,7 +49,6 @@ using (
   )
 );
 
--- Add yourself before deploying the app change:
--- insert into public.app_members (email, invited_by)
--- values ('you@example.com', 'owner')
--- on conflict (email) do update set active = true;
+insert into public.app_members (email, invited_by)
+values ('keyshawn@weareblackamerica.com', 'owner')
+on conflict (email) do update set active = true;
