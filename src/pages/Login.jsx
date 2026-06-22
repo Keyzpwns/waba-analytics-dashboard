@@ -6,11 +6,9 @@ import { useAuth } from '../lib/auth.jsx'
 export default function Login() {
   const navigate = useNavigate()
   const { session } = useAuth()
-  const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState(null)
   const [error, setError] = useState(null)
 
   if (session) {
@@ -22,18 +20,11 @@ export default function Login() {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    setMessage(null)
+
     try {
-      if (mode === 'signin') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        navigate('/', { replace: true })
-      } else {
-        const { error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-        setMessage('Account created. Check your email to confirm, then sign in.')
-        setMode('signin')
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
+      navigate('/', { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -54,20 +45,20 @@ export default function Login() {
               <span className="italic font-normal text-gold">read aloud</span>.
             </h1>
             <p className="font-display font-light text-xl text-bone/70 mt-8 max-w-md leading-relaxed">
-              A weekly account of what reached, what landed, and what to do next — across every channel WABA touches.
+              A weekly account of what reached, what landed, and what to do next - across every channel WABA touches.
             </p>
           </div>
           <div className="font-mono text-[0.65rem] text-ash tracking-widest">
-            INSTAGRAM &nbsp;·&nbsp; TIKTOK &nbsp;·&nbsp; YOUTUBE &nbsp;·&nbsp; FACEBOOK
+            INSTAGRAM &nbsp;/&nbsp; TIKTOK &nbsp;/&nbsp; YOUTUBE &nbsp;/&nbsp; FACEBOOK
           </div>
         </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
-          <p className="eyebrow mb-2">{mode === 'signin' ? 'Sign in' : 'Create account'}</p>
+          <p className="eyebrow mb-2">Invite-only access</p>
           <h2 className="font-display text-3xl font-light text-paper mb-8">
-            {mode === 'signin' ? 'Welcome back.' : 'Get access.'}
+            Welcome back.
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -94,23 +85,19 @@ export default function Login() {
             </div>
 
             {error && <p className="text-ember text-sm font-mono">{error}</p>}
-            {message && <p className="text-mint text-sm font-mono">{message}</p>}
 
             <button
               type="submit"
               disabled={busy}
               className="w-full bg-paper text-ink font-mono text-xs tracking-widest uppercase py-3 mt-4 hover:bg-gold transition-colors disabled:opacity-50"
             >
-              {busy ? 'Working…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
+              {busy ? 'Working...' : 'Sign in'}
             </button>
           </form>
 
-          <button
-            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); setMessage(null) }}
-            className="mt-6 eyebrow text-ash hover:text-paper transition-colors"
-          >
-            {mode === 'signin' ? 'No account? Sign up →' : '← Have an account? Sign in'}
-          </button>
+          <p className="mt-6 font-mono text-xs text-ash leading-relaxed">
+            New accounts are created by invitation from the workspace owner.
+          </p>
         </div>
       </div>
     </div>
