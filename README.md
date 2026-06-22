@@ -27,15 +27,29 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_...
 
 This repo is linked to the `waba-analytics` Netlify site. Pushes to `main` auto-deploy.
 
-Build command: `npm run build` · Publish directory: `dist`
+Build command: `npm run build` / Publish directory: `dist`
 
 ## Data model
 
-- `weekly_reports` — one row per week (week_start, week_end, totals_by_platform, ai_report)
-- `weekly_posts` — one row per post (foreign key to a report)
+- `weekly_reports` - one row per week (week_start, week_end, totals_by_platform, ai_report)
+- `weekly_posts` - one row per post (foreign key to a report)
 
-Both tables have RLS enabled — only authenticated Supabase users can read; only the n8n service-role key can write.
+Both tables have RLS enabled - only authenticated Supabase users can read; only the n8n service-role key can write.
 
 ## Access
 
-Sign-up is open at /login. Create an account, then sign in. Add or remove users from the Supabase Auth dashboard.
+Access is invite-only.
+
+1. In Supabase, turn off public signups: Authentication -> Providers -> Email -> disable "Allow new users to sign up".
+2. Run `supabase/migrations/202606220001_invite_only_access.sql` in the Supabase SQL editor.
+3. Add your owner email to `public.app_members`:
+
+```sql
+insert into public.app_members (email, invited_by)
+values ('you@example.com', 'owner')
+on conflict (email) do update set active = true;
+```
+
+To invite someone, send an invitation from the Supabase Auth dashboard, then add the same email to `public.app_members`. To remove access, set `active = false` for that email or delete the row.
+
+The dashboard checks `app_members` after sign-in, and database RLS restricts `weekly_reports` and `weekly_posts` reads to active invited members.
