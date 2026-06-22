@@ -42,11 +42,11 @@ Access is invite-only.
 
 1. In Supabase, turn off public signups: Authentication -> Providers -> Email -> disable "Allow new users to sign up".
 2. Run `supabase/migrations/202606220001_invite_only_access.sql` in the Supabase SQL editor.
-3. Add your owner email to `public.app_members`:
+3. Confirm the owner email exists in `public.app_members`:
 
 ```sql
 insert into public.app_members (email, invited_by)
-values ('you@example.com', 'owner')
+values ('keyshawn@weareblackamerica.com', 'owner')
 on conflict (email) do update set active = true;
 ```
 
