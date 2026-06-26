@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/auth.jsx'
 import { supabase } from './lib/supabase.js'
 import Login from './pages/Login.jsx'
+import SetPassword from './pages/SetPassword.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 
 function Protected({ children }) {
@@ -48,6 +49,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/set-password" element={<SetPassword />} />
         <Route path="/" element={<Protected><Dashboard /></Protected>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
