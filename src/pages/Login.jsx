@@ -8,8 +8,10 @@ export default function Login() {
   const { session } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [mode, setMode] = useState('sign-in')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
 
   if (session) {
     navigate('/', { replace: true })
@@ -30,6 +32,31 @@ export default function Login() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function handlePasswordReset(e) {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/set-password`,
+      })
+      if (error) throw error
+      setMessage('Check your inbox for a secure link to choose your password.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function showPasswordReset() {
+    setMode('reset')
+    setError(null)
+    setMessage(null)
   }
 
   return (
@@ -61,7 +88,7 @@ export default function Login() {
             Welcome back.
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={mode === 'sign-in' ? handleSubmit : handlePasswordReset} className="space-y-5">
             <div>
               <label className="eyebrow block mb-2">Email</label>
               <input
@@ -72,7 +99,7 @@ export default function Login() {
                 className="w-full bg-transparent border-b border-paper/20 py-2 text-paper focus:border-ember outline-none transition-colors"
               />
             </div>
-            <div>
+            {mode === 'sign-in' ? <div>
               <label className="eyebrow block mb-2">Password</label>
               <input
                 type="password"
@@ -82,21 +109,40 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-transparent border-b border-paper/20 py-2 text-paper focus:border-ember outline-none transition-colors"
               />
-            </div>
+            </div> : null}
 
             {error && <p className="text-ember text-sm font-mono">{error}</p>}
+            {message && <p className="text-gold text-sm font-mono">{message}</p>}
 
             <button
               type="submit"
               disabled={busy}
               className="w-full bg-paper text-ink font-mono text-xs tracking-widest uppercase py-3 mt-4 hover:bg-gold transition-colors disabled:opacity-50"
             >
-              {busy ? 'Working...' : 'Sign in'}
+              {busy ? 'Working...' : mode === 'sign-in' ? 'Sign in' : 'Send secure link'}
             </button>
           </form>
 
+          {mode === 'sign-in' ? (
+            <button
+              type="button"
+              onClick={showPasswordReset}
+              className="mt-5 font-mono text-xs text-gold hover:text-paper transition-colors"
+            >
+              Set or reset password
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setMode('sign-in')}
+              className="mt-5 font-mono text-xs text-gold hover:text-paper transition-colors"
+            >
+              Back to sign in
+            </button>
+          )}
+
           <p className="mt-6 font-mono text-xs text-ash leading-relaxed">
-            New accounts are created by invitation from the workspace owner.
+            New accounts are created by invitation from the workspace owner. Invited members can choose a password from their email link.
           </p>
         </div>
       </div>
